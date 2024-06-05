@@ -1,6 +1,6 @@
 use oort_api::prelude::*;
 
-const BULLET_SPEED: f64 = 900.0; // m/s
+const BULLET_SPEED: f64 = 1000.0; // m/s
 
 pub struct Ship {}
 
@@ -24,7 +24,7 @@ impl Ship {
 fn aim_at_target(target: ScanResult){
     let dp = target.position - position();
     let angle = smart_aim(dp, target.velocity, BULLET_SPEED);
-    turn(turn_controller(angle, heading(), 10.0, 0.1));
+    turn(turn_controller(angle, heading(), 50.0, 0.1));
     fire(0);
 }
 
