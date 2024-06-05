@@ -12,7 +12,7 @@
 // p.s. You can change your username by clicking on it at the top of the page.
 use oort_api::prelude::*;
 
-const BULLET_SPEED: f64 = 810.0; // m/s
+const BULLET_SPEED: f64 = 1000.0; // m/s
 
 pub struct Ship {}
 
@@ -25,7 +25,8 @@ impl Ship {
         let dp = target() - position();
         let angle = smart_aim(dp, target_velocity(), BULLET_SPEED);
 
-        turn(angle_diff(heading(), angle) * 2.0);
+        turn(torque_controller(angle, heading(), 50.0, 0.01));
+
         fire(0);
     }
 }
@@ -36,4 +37,11 @@ fn smart_aim(target: Vec2, target_velocity: Vec2, bullet_speed: f64) -> f64 {
     let angle_adjust = f64::asin(r_cross_v / (mag_r * bullet_speed));
 
     return angle_adjust + f64::atan2(target.y, target.x);
+}
+
+fn torque_controller(angle: f64, heading: f64, kp: f64, kd: f64) -> f64 {
+    let error = angle_diff(heading, angle);
+    let derivative = -kd * error;
+    let proportional = kp * error;
+    return derivative + proportional;
 }
