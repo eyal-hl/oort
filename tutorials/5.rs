@@ -12,7 +12,7 @@
 // p.s. You can change your username by clicking on it at the top of the page.
 use oort_api::prelude::*;
 
-const BULLET_SPEED: f64 = 1000.0; // m/s
+const BULLET_SPEED: f64 = 810.0; // m/s
 
 pub struct Ship {}
 
@@ -23,17 +23,17 @@ impl Ship {
 
     pub fn tick(&mut self) {
         let dp = target() - position();
-        let target_future_location = target() + (target_velocity()*2.0 * (dp.length()/BULLET_SPEED));
-        debug!("distance to target: {}", dp.length());
-        debug!("time to target: {}", dp.length() / BULLET_SPEED);
-        debug!("target location: {}", target());
-        debug!("target future location: {}", target_future_location);
-        draw_line(position(), target(), 0x00ff00);
-        draw_line(position(), target_future_location, 0x0000FF);
-        draw_line(target(), target_future_location, 0xFF0000);
-        debug!("target velocity: {}", target_velocity());
+        let angle = smart_aim(dp, target_velocity(), BULLET_SPEED);
 
-        turn(angle_diff(heading(), (target_future_location-position()).angle()));
+        turn(angle_diff(heading(), angle) * 2.0);
         fire(0);
     }
+}
+
+fn smart_aim(target: Vec2, target_velocity: Vec2, bullet_speed: f64) -> f64 {
+    let r_cross_v = target.x * target_velocity.y - target.y * target_velocity.x;
+    let mag_r = f64::sqrt(target.x * target.x + target.y * target.y);
+    let angle_adjust = f64::asin(r_cross_v / (mag_r * bullet_speed));
+
+    return angle_adjust + f64::atan2(target.y, target.x);
 }
